@@ -1,14 +1,14 @@
 ﻿using DBAccessLib.Core;
-using DBAccessLib.SqlServer;
+using DBAccessLib.MySql;
 
 namespace DBAccessLib.Factories
 {
-    public class SqlProviderFactory : IDbProviderFactory
+    public class MySqlProviderFactory: IDbProviderFactory
     {
         public IDatabaseConnection CreateConnection(string connectionString)
-           => new SqlDbConnection(connectionString);
+           => new MySqlDbConnection(connectionString);
 
         public IRepository CreateRepository(IDatabaseConnection connection)
-            => new SqlDbRepository(connection);
+            => new MySqlDbRepository(connection);
     }
 }

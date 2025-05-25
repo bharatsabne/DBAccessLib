@@ -1,19 +1,19 @@
 ﻿using DBAccessLib.Core;
-using Microsoft.Data.SqlClient;
+using MySql.Data.MySqlClient;
 using System.Data;
 using System.Data.Common;
 
-namespace DBAccessLib.SqlServer
+namespace DBAccessLib.MySql
 {
-    public class SqlDbConnection : IDatabaseConnection
+    public class MySqlDbConnection : IDatabaseConnection
     {
         private readonly string _connectionString;
-        private SqlConnection _connection;
+        private MySqlConnection _connection;
 
-        public SqlDbConnection(string connectionString)
+        public MySqlDbConnection(string connectionString)
         {
             _connectionString = connectionString;
-            _connection = new SqlConnection(_connectionString);
+            _connection = new MySqlConnection(_connectionString);
         }
 
         public DbConnection Connection => _connection;
