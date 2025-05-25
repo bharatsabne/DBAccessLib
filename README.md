@@ -19,7 +19,7 @@ Before executing any database commands, register your database providers with th
 ```csharp
 DbProviderRegistry.Register("Sqlite", new SqliteProviderFactory());
 DbProviderRegistry.Register("SqlServer", new SqlServerProviderFactory());
-
+```
 
 ## ⚙️ Usage Example
 ```csharp
@@ -40,10 +40,13 @@ else
 {
     Console.WriteLine("No result returned or null.");
 }
+```
 
 ## 🔍 ExecuteScalar Null Handling
+```csharp
 public object? ExecuteScalar(string query, CommandType type, params DbParameter[] parameters)
 {
     var command = CreateCommand(query, type, parameters);
     return command.ExecuteScalar();
 }
+```
