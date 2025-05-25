@@ -157,5 +157,99 @@ namespace DBAccessLib.Sqlite
                 command.Parameters.AddRange(parameters);
             return command;
         }
+        public int Insert<T>(T entity)
+        {
+            var type = typeof(T);
+            var tableName = type.Name;
+            var props = type.GetProperties();
+
+            var columns = string.Join(", ", props.Select(p => p.Name));
+            var values = string.Join(", ", props.Select(p => "@" + p.Name));
+            var sql = $"INSERT INTO {tableName} ({columns}) VALUES ({values})";
+
+            using var command = _dbConnection.Connection.CreateCommand();
+            command.CommandText = sql;
+            command.CommandType = CommandType.Text;
+
+            foreach (var prop in props)
+            {
+                var param = command.CreateParameter();
+                param.ParameterName = "@" + prop.Name;
+                param.Value = prop.GetValue(entity) ?? DBNull.Value;
+                command.Parameters.Add(param);
+            }
+
+            _dbConnection.Open();
+            var result = command.ExecuteNonQuery();
+            _dbConnection.Close();
+
+            return result;
+        }
+        public int Update<T>(T entity, string[] keyColumns)
+        {
+            var type = typeof(T);
+            var tableName = type.Name;
+            var props = type.GetProperties();
+
+            var keyProps = props.Where(p => keyColumns.Contains(p.Name)).ToList();
+            var nonKeyProps = props.Except(keyProps).ToList();
+
+            if (!keyProps.Any())
+                throw new ArgumentException("At least one key column must be specified.");
+
+            var setClause = string.Join(", ", nonKeyProps.Select(p => $"{p.Name} = @{p.Name}"));
+            var whereClause = string.Join(" AND ", keyProps.Select(p => $"{p.Name} = @{p.Name}"));
+
+            var sql = $"UPDATE {tableName} SET {setClause} WHERE {whereClause}";
+
+            using var command = _dbConnection.Connection.CreateCommand();
+            command.CommandText = sql;
+            command.CommandType = CommandType.Text;
+
+            foreach (var prop in props)
+            {
+                var param = command.CreateParameter();
+                param.ParameterName = "@" + prop.Name;
+                param.Value = prop.GetValue(entity) ?? DBNull.Value;
+                command.Parameters.Add(param);
+            }
+
+            _dbConnection.Open();
+            var result = command.ExecuteNonQuery();
+            _dbConnection.Close();
+
+            return result;
+        }
+        public int Delete<T>(T entity, string[] keyColumns)
+        {
+            var type = typeof(T);
+            var tableName = type.Name;
+            var props = type.GetProperties();
+
+            var keyProps = props.Where(p => keyColumns.Contains(p.Name)).ToList();
+            if (!keyProps.Any())
+                throw new ArgumentException("At least one key column must be specified.");
+
+            var whereClause = string.Join(" AND ", keyProps.Select(p => $"{p.Name} = @{p.Name}"));
+            var sql = $"DELETE FROM {tableName} WHERE {whereClause}";
+
+            using var command = _dbConnection.Connection.CreateCommand();
+            command.CommandText = sql;
+            command.CommandType = CommandType.Text;
+
+            foreach (var prop in keyProps)
+            {
+                var param = command.CreateParameter();
+                param.ParameterName = "@" + prop.Name;
+                param.Value = prop.GetValue(entity) ?? DBNull.Value;
+                command.Parameters.Add(param);
+            }
+
+            _dbConnection.Open();
+            var result = command.ExecuteNonQuery();
+            _dbConnection.Close();
+
+            return result;
+        }
     }
 }

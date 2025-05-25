@@ -20,5 +20,9 @@ namespace DBAccessLib.Core
         void BeginTransaction();
         void Commit();
         void Rollback();
+
+        int Insert<T>(T entity);
+        int Update<T>(T entity, string[] keyColumns);
+        int Delete<T>(T entity, string[] keyColumns);
     }
 }
