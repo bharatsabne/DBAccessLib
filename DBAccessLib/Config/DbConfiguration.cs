@@ -1,18 +1,30 @@
-﻿using Microsoft.IdentityModel.Protocols;
+﻿using DBAccessLib.Core;
+using Microsoft.IdentityModel.Protocols;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Configuration;
 
 namespace DBAccessLib.Config
 {
-    public static class DbConfiguration
+    public class DbConfiguration
     {
-        public static string GetConnectionString(string name = "DBConnectionString")
+        public string Name { get; set; }
+        public string Provider { get; set; }
+        public string ConnectionString { get; set; }
+
+        public IDatabaseConnection CreateConnection()
         {
-            return "Server=JITUND-0064\\SQLEXPRESS;Database=Readfines;User Id=sa;Password=Pass@1234;TrustServerCertificate=True;";
+            var factory = DbProviderRegistry.GetFactory(Provider);
+            return factory.CreateConnection(ConnectionString);
+        }
+
+        public IRepository CreateRepository(IDatabaseConnection connection)
+        {
+            var factory = DbProviderRegistry.GetFactory(Provider);
+            return factory.CreateRepository(connection);
         }
     }
 }
