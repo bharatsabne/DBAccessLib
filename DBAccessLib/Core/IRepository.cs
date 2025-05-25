@@ -10,6 +10,7 @@ namespace DBAccessLib.Core
 {
     public interface IRepository
     {
+        DbParameter CreateParameter(string name, object value);
         IDataReader ExecuteReader(string query, CommandType type, params DbParameter[] parameters);
         object? ExecuteScalar(string query, CommandType type, params DbParameter[] parameters);
         IEnumerable<T> QueryToList<T>(string sql, CommandType commandType = CommandType.Text);

@@ -1,6 +1,8 @@
 ﻿using DBAccessLib.Config;
 using DBAccessLib.Core;
 using DBAccessLib.Factories;
+using System.Data;
+using System.Data.Common;
 using Util;
 
 class Program
@@ -39,8 +41,15 @@ class Program
         var sqlConnection = sqlConfig.CreateConnection();
         var sqlRepository = sqlConfig.CreateRepository(sqlConnection);
 
+        var parameters = new[]
+        {
+            sqlRepository.CreateParameter("@Id", 1),
+            sqlRepository.CreateParameter("@Name", "Alice"),
+            sqlRepository.CreateParameter("@IsActive", true)
+        };
 
-        var result = sqlRepository.QueryToList<Book>("Test",System.Data.CommandType.StoredProcedure);
+        var result = sqlRepository.QueryToList<Book>("Test",
+                     System.Data.CommandType.StoredProcedure, parameters);
 
         var result2 = repository.QueryToList<UserMaster>("SELECT * FROM User_Master");
     }

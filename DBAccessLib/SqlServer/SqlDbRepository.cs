@@ -1,4 +1,5 @@
 ﻿using DBAccessLib.Core;
+using DBAccessLib.Core.Attributes;
 using DBAccessLib.Core.Extensions;
 using Microsoft.Data.SqlClient;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -21,7 +23,14 @@ namespace DBAccessLib.SqlServer
         {
             _dbConnection = dbConnection;
         }
-
+        public DbParameter CreateParameter(string name, object value)
+        {
+            using var command = ((SqlConnection)_dbConnection.Connection).CreateCommand();
+            var parameter = command.CreateParameter();
+            parameter.ParameterName = name;
+            parameter.Value = value ?? DBNull.Value;
+            return parameter;
+        }
         public IDataReader ExecuteReader(string query, CommandType type, params DbParameter[] parameters)
         {
             var command = CreateCommand(query, type, parameters);
@@ -93,10 +102,15 @@ namespace DBAccessLib.SqlServer
                 var obj = Activator.CreateInstance<T>();
                 foreach (var prop in props)
                 {
-                    if (!reader.HasColumn(prop.Name) || reader[prop.Name] is DBNull)
+                    var columnAttr = prop.GetCustomAttribute<ColumnNameAttribute>();
+                    var columnName = columnAttr?.Name ?? prop.Name;
+                    //if (!reader.HasColumn(prop.Name) || reader[prop.Name] is DBNull)
+                    //    continue;
+                    if (!reader.HasColumn(columnName) || reader[columnName] is DBNull)
                         continue;
 
-                    var dbValue = reader[prop.Name];
+                    //var dbValue = reader[prop.Name];
+                    var dbValue = reader[columnName];
                     var targetType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
 
                     var safeValue = Convert.ChangeType(dbValue, targetType);

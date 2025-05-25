@@ -1,4 +1,5 @@
 ﻿using DBAccessLib.Core;
+using DBAccessLib.Core.Attributes;
 using DBAccessLib.Core.Extensions;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Data;
 using System.Data.Common;
 using System.Data.SQLite;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -21,7 +23,14 @@ namespace DBAccessLib.Sqlite
         {
             _dbConnection = dbConnection;
         }
-
+        public DbParameter CreateParameter(string name, object value)
+        {
+            using var command = _dbConnection.Connection.CreateCommand();
+            var parameter = command.CreateParameter();
+            parameter.ParameterName = name;
+            parameter.Value = value ?? DBNull.Value;
+            return parameter;
+        }
         public void BeginTransaction()
         {
             _dbConnection.Open();
@@ -59,10 +68,15 @@ namespace DBAccessLib.Sqlite
                 var obj = Activator.CreateInstance<T>();
                 foreach (var prop in props)
                 {
-                    if (!reader.HasColumn(prop.Name) || reader[prop.Name] is DBNull)
+                    var columnAttr = prop.GetCustomAttribute<ColumnNameAttribute>();
+                    var columnName = columnAttr?.Name ?? prop.Name;
+                    //if (!reader.HasColumn(prop.Name) || reader[prop.Name] is DBNull)
+                    //    continue;
+                    if (!reader.HasColumn(columnName) || reader[columnName] is DBNull)
                         continue;
 
-                    var dbValue = reader[prop.Name];
+                    //var dbValue = reader[prop.Name];
+                    var dbValue = reader[columnName];
                     var targetType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
 
                     // Convert.ChangeType handles conversion like Int64 to Int32, string to int, etc.

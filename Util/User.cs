@@ -6,13 +6,15 @@ using System.Threading.Tasks;
 
 namespace Util
 {
+    using DBAccessLib.Core.Attributes;
     using System;
 
     public class UserMaster
     {
         public int User_Id { get; set; }         
-        public string User_Code { get; set; }    
-        public string User_Name { get; set; }     
+        public string User_Code { get; set; }
+        [ColumnName("User_Name")]
+        public string UserName { get; set; }     
         public string User_Password { get; set; }    
         public int UserRoleId { get; set; }      
         public bool IsActive { get; set; }       
