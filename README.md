@@ -61,7 +61,7 @@ class Program
         {
             Name = "SqlDb",
             Provider = "SqlServer",
-            ConnectionString = "Server=SERVERNAME;Database=Readfines;User Id=sa;Password=Pass@1234;TrustServerCertificate=True;"
+            ConnectionString = "Server=SERVERNAME;Database=DatabaseName;User Id=sa;Password=YourPassword;TrustServerCertificate=True;"
         };
 
         var mysqlConfig = new DbConfiguration
